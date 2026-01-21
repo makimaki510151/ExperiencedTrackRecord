@@ -1,0 +1,417 @@
+/* 基本スタイル */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    color: #e0e0e0;
+    overflow: hidden;
+}
+
+/* 画面切り替え */
+.screen {
+    display: none;
+    width: 100vw;
+    height: 100vh;
+    padding: 20px;
+}
+
+.screen.active {
+    display: block !important;
+}
+
+/* 拠点メニュー */
+#baseMenu.screen.active {
+    display: flex !important;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 30px;
+}
+
+/* ダンジョン選択画面 */
+#dungeonSelect.screen.active {
+    display: flex !important;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 30px;
+    padding-top: 50px;
+}
+
+/* スキル一覧画面 */
+#skillScreen.screen.active {
+    display: flex !important;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 20px;
+    padding-top: 50px;
+}
+
+/* 実績一覧画面 */
+#achievementScreen.screen.active {
+    display: flex !important;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 20px;
+    padding-top: 50px;
+}
+
+#baseMenu h1 {
+    font-size: 3em;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    color: #ffd700;
+}
+
+.menu-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.menu-btn, .back-btn {
+    padding: 15px 30px;
+    font-size: 1.2em;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.menu-btn:hover, .back-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+.status-preview {
+    background: rgba(0, 0, 0, 0.5);
+    padding: 20px;
+    border-radius: 10px;
+    min-width: 300px;
+}
+
+/* ダンジョン選択画面 */
+#dungeonSelect {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 30px;
+}
+
+.dungeon-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    width: 80%;
+    max-width: 1000px;
+}
+
+.dungeon-item {
+    background: rgba(0, 0, 0, 0.6);
+    padding: 20px;
+    border-radius: 10px;
+    border: 2px solid #667eea;
+    cursor: pointer;
+    transition: transform 0.2s, border-color 0.2s;
+}
+
+.dungeon-item:hover {
+    transform: scale(1.05);
+    border-color: #ffd700;
+}
+
+.dungeon-item h3 {
+    color: #ffd700;
+    margin-bottom: 10px;
+}
+
+/* 戦闘画面レイアウト */
+.battle-layout {
+    display: grid;
+    grid-template-columns: 300px 1fr 350px;
+    gap: 15px;
+    height: 100%;
+}
+
+/* 戦闘ログ */
+.battle-log {
+    background: rgba(0, 0, 0, 0.7);
+    border-radius: 10px;
+    padding: 15px;
+    overflow-y: auto;
+    border: 2px solid #444;
+}
+
+.battle-log h3 {
+    color: #ffd700;
+    margin-bottom: 10px;
+    border-bottom: 2px solid #667eea;
+    padding-bottom: 5px;
+}
+
+.log-content {
+    font-size: 0.9em;
+    line-height: 1.6;
+}
+
+.log-entry {
+    margin-bottom: 8px;
+    padding: 5px;
+    border-left: 3px solid #667eea;
+    padding-left: 10px;
+}
+
+.log-entry.damage {
+    color: #ff6b6b;
+    border-left-color: #ff6b6b;
+}
+
+.log-entry.heal {
+    color: #51cf66;
+    border-left-color: #51cf66;
+}
+
+.log-entry.levelup {
+    color: #ffd700;
+    border-left-color: #ffd700;
+}
+
+/* ゲームエリア */
+.game-area {
+    position: relative;
+    background: rgba(0, 0, 0, 0.8);
+    border-radius: 10px;
+    border: 2px solid #444;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+#gameCanvas {
+    display: block;
+    background: #0a0a0a;
+}
+
+.image-upload-panel {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(0, 0, 0, 0.8);
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #667eea;
+    z-index: 10;
+}
+
+.image-upload-panel h4 {
+    font-size: 0.9em;
+    margin-bottom: 8px;
+    color: #ffd700;
+}
+
+.image-upload-panel input,
+.image-upload-panel button {
+    font-size: 0.8em;
+    padding: 5px 10px;
+    margin: 3px 0;
+    width: 100%;
+}
+
+/* サイドパネル */
+.side-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    overflow-y: auto;
+}
+
+.status-panel, .skill-panel, .achievement-panel {
+    background: rgba(0, 0, 0, 0.7);
+    border-radius: 10px;
+    padding: 15px;
+    border: 2px solid #444;
+}
+
+.status-panel h3, .skill-panel h3, .achievement-panel h3 {
+    color: #ffd700;
+    margin-bottom: 10px;
+    border-bottom: 2px solid #667eea;
+    padding-bottom: 5px;
+}
+
+/* スキルアイテム */
+.skill-item {
+    background: rgba(102, 126, 234, 0.2);
+    padding: 10px;
+    margin-bottom: 8px;
+    border-radius: 5px;
+    border-left: 4px solid #667eea;
+}
+
+.skill-item.rank-up {
+    border-left-color: #ffd700;
+    background: rgba(255, 215, 0, 0.2);
+}
+
+.skill-name {
+    font-weight: bold;
+    color: #ffd700;
+}
+
+.skill-rank {
+    color: #667eea;
+    font-size: 0.9em;
+}
+
+.skill-proficiency {
+    color: #51cf66;
+    font-size: 0.85em;
+}
+
+/* ステータス表示 */
+.stat-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 5px 0;
+    border-bottom: 1px solid #333;
+}
+
+.stat-label {
+    color: #aaa;
+}
+
+.stat-value {
+    color: #ffd700;
+    font-weight: bold;
+}
+
+/* 実績アイテム */
+.achievement-item {
+    background: rgba(102, 126, 234, 0.2);
+    padding: 10px;
+    margin-bottom: 8px;
+    border-radius: 5px;
+}
+
+.achievement-item.unlocked {
+    border: 2px solid #ffd700;
+    background: rgba(255, 215, 0, 0.2);
+}
+
+.achievement-item.locked {
+    opacity: 0.5;
+}
+
+.achievement-name {
+    font-weight: bold;
+    color: #ffd700;
+}
+
+.achievement-desc {
+    color: #aaa;
+    font-size: 0.9em;
+    margin-top: 5px;
+}
+
+.achievement-hidden {
+    color: #666;
+}
+
+/* リザルト画面 */
+.result-content {
+    background: rgba(0, 0, 0, 0.7);
+    padding: 30px;
+    border-radius: 10px;
+    max-width: 600px;
+    margin: 20px auto;
+    text-align: center;
+}
+
+/* エフェクト用クラス */
+.damage-popup {
+    position: absolute;
+    color: #ff6b6b;
+    font-weight: bold;
+    font-size: 1.5em;
+    pointer-events: none;
+    animation: popup 1s ease-out forwards;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+@keyframes popup {
+    0% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-50px) scale(1.2);
+    }
+}
+
+.shake {
+    animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-10px); }
+    75% { transform: translateX(10px); }
+}
+
+/* スクロールバーのスタイル */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #667eea;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #764ba2;
+}
+
+/* リザルト画面 */
+#resultScreen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+}
+
+#resultTitle {
+    font-size: 2.5em;
+    color: #ffd700;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+/* スキル・実績詳細画面 */
+#skillScreen, #achievementScreen {
+    max-width: 1200px;
+    margin: 0 auto;
+    overflow-y: auto;
+}
+
+#skillDetailContent, #achievementDetailContent {
+    background: rgba(0, 0, 0, 0.7);
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}

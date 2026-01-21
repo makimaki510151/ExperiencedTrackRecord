@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>テキストベースファンタジーRPG</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- 拠点メニュー画面 -->
+    <div id="baseMenu" class="screen active">
+        <h1>冒険者の拠点</h1>
+        <div class="menu-buttons">
+            <button id="btnDungeon" class="menu-btn">ダンジョン探索</button>
+            <button id="btnSkills" class="menu-btn">スキル一覧</button>
+            <button id="btnAchievements" class="menu-btn">実績・称号</button>
+            <button id="btnSettings" class="menu-btn">設定</button>
+        </div>
+        <div id="playerStatusPreview" class="status-preview">
+            <h3>ステータス</h3>
+            <div id="statusPreviewContent"></div>
+        </div>
+    </div>
+
+    <!-- ダンジョン選択画面 -->
+    <div id="dungeonSelect" class="screen">
+        <h1>ダンジョン選択</h1>
+        <div id="dungeonList" class="dungeon-list"></div>
+        <button id="btnBackToBase" class="back-btn">拠点に戻る</button>
+    </div>
+
+    <!-- 戦闘画面 -->
+    <div id="battleScreen" class="screen">
+        <div class="battle-layout">
+            <!-- 左側：戦闘ログ -->
+            <div id="battleLog" class="battle-log">
+                <h3>戦闘ログ</h3>
+                <div id="logContent" class="log-content"></div>
+            </div>
+
+            <!-- 中央：メインゲーム画面 -->
+            <div class="game-area">
+                <canvas id="gameCanvas"></canvas>
+                <div id="playerImageUpload" class="image-upload-panel">
+                    <h4>プレイヤー画像設定</h4>
+                    <input type="file" id="playerImageInput" accept="image/*">
+                    <button id="btnResetPlayerImage">デフォルトに戻す</button>
+                </div>
+            </div>
+
+            <!-- 右側：ステータス・スキル・実績 -->
+            <div class="side-panel">
+                <div id="playerStatus" class="status-panel">
+                    <h3>ステータス</h3>
+                    <div id="statusContent"></div>
+                </div>
+                <div id="skillList" class="skill-panel">
+                    <h3>スキル</h3>
+                    <div id="skillContent"></div>
+                </div>
+                <div id="achievementPanel" class="achievement-panel">
+                    <h3>実績</h3>
+                    <div id="achievementContent"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- リザルト画面 -->
+    <div id="resultScreen" class="screen">
+        <h1 id="resultTitle"></h1>
+        <div id="resultContent" class="result-content"></div>
+        <button id="btnReturnToBase" class="menu-btn">拠点に戻る</button>
+    </div>
+
+    <!-- スキル一覧画面 -->
+    <div id="skillScreen" class="screen">
+        <h1>スキル一覧</h1>
+        <div id="skillDetailContent"></div>
+        <button id="btnBackToBase2" class="back-btn">拠点に戻る</button>
+    </div>
+
+    <!-- 実績一覧画面 -->
+    <div id="achievementScreen" class="screen">
+        <h1>実績・称号一覧</h1>
+        <div id="achievementDetailContent"></div>
+        <button id="btnBackToBase3" class="back-btn">拠点に戻る</button>
+    </div>
+
+    <!-- データ定義ファイル（先に読み込む） -->
+    <script src="enemies.js"></script>
+    <script src="achievements.js"></script>
+    <script src="dungeons.js"></script>
+    <!-- メインゲームファイル -->
+    <script src="game.js"></script>
+</body>
+</html>
