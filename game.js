@@ -15,6 +15,8 @@ class GameState {
         const allScreens = document.querySelectorAll('.screen');
         allScreens.forEach(screen => {
             screen.classList.remove('active');
+            // 確実に非表示にする
+            screen.style.display = 'none';
         });
         
         // 指定された画面を取得
@@ -29,8 +31,14 @@ class GameState {
         targetScreen.classList.add('active');
         this.currentScreen = screenId;
         
-        // デバッグ用ログ（本番では削除可能）
+        // 強制的に表示（CSSクラスで制御されるが、念のため）
+        // CSSの!importantが優先されるので、style属性は削除
+        targetScreen.style.display = '';
+        
+        // デバッグ用ログ
         console.log(`画面を切り替えました: ${screenId}`);
+        console.log(`Target screen classes:`, targetScreen.className);
+        console.log(`Target screen computed display:`, window.getComputedStyle(targetScreen).display);
         
         return true;
     }

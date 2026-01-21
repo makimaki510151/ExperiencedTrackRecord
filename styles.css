@@ -43,6 +43,13 @@ body {
     padding-top: 50px;
 }
 
+/* ダンジョン選択画面のベーススタイル（非表示時も） */
+#dungeonSelect {
+    flex-direction: column;
+    align-items: center;
+    gap: 30px;
+}
+
 /* スキル一覧画面 */
 #skillScreen.screen.active {
     display: flex !important;
@@ -53,6 +60,13 @@ body {
     padding-top: 50px;
 }
 
+/* スキル一覧画面のベーススタイル */
+#skillScreen {
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
 /* 実績一覧画面 */
 #achievementScreen.screen.active {
     display: flex !important;
@@ -61,6 +75,13 @@ body {
     justify-content: flex-start;
     gap: 20px;
     padding-top: 50px;
+}
+
+/* 実績一覧画面のベーススタイル */
+#achievementScreen {
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
 }
 
 #baseMenu h1 {
@@ -98,13 +119,7 @@ body {
     min-width: 300px;
 }
 
-/* ダンジョン選択画面 */
-#dungeonSelect {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 30px;
-}
+/* ダンジョン選択画面のスタイルは .screen.active で管理 */
 
 .dungeon-list {
     display: grid;
