@@ -292,6 +292,31 @@ body {
     font-size: 0.85em;
 }
 
+/* スキル選択状態 */
+.skill-item.selected {
+    border-color: #ffd700;
+    background: rgba(102, 126, 234, 0.3);
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+}
+
+/* クールタイム表示 */
+.skill-item.on-cooldown {
+    position: relative;
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+.cooldown-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    height: 0%; /* JSで動的に変更 */
+    transition: height 0.1s linear;
+    border-radius: 0 0 8px 8px;
+}
+
 /* ステータス表示 */
 .stat-item {
     display: flex;

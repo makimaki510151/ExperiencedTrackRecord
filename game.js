@@ -60,6 +60,7 @@ class Player {
         this.level = 1;
         this.exp = 0;
         this.expToNext = 100;
+        this.mpRegen = 0.05;
 
         // プレイヤー画像
         this.image = null;
@@ -141,6 +142,13 @@ class Player {
         game.battleLog.addEntry(`レベルアップ！ Lv.${this.level}`, 'levelup');
     }
 
+    update() {
+        // MP自動回復（小数点以下の計算を確実に行う）
+        if (this.mp < this.getMaxMp()) {
+            this.mp = Math.min(this.getMaxMp(), this.mp + this.mpRegen);
+        }
+    }
+
     loadImage(file) {
         const reader = new FileReader();
         reader.onload = (e) => {
@@ -179,13 +187,15 @@ class Player {
 
 // スキルシステム
 class Skill {
-    constructor(id, name, description, baseCost, baseDamage, element = 'normal') {
+    constructor(id, name, description, baseCost, baseDamage, element = 'normal', cooldown = 180) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.baseCost = baseCost;
         this.baseDamage = baseDamage;
         this.element = element;
+        this.baseCooldown = cooldown; // デフォルト3秒(60fps*3)
+        this.currentCooldown = 0;
 
         // 熟練度システム
         this.usageCount = 0;
@@ -219,9 +229,19 @@ class Skill {
         return Math.floor(this.baseDamage * multiplier);
     }
 
-    // スキル使用
+    update() {
+        if (this.currentCooldown > 0) {
+            this.currentCooldown--;
+        }
+    }
+
+    isReady() {
+        return this.currentCooldown <= 0;
+    }
+
     use() {
         this.usageCount++;
+        this.currentCooldown = this.baseCooldown;
         this.checkRankUp();
     }
 
@@ -664,15 +684,22 @@ class Renderer {
         this.ctx.textAlign = 'center';
         this.ctx.fillText(text, x, y);
     }
+
+    drawAttackLine(startX, startY, endX, endY, color) {
+        this.ctx.strokeStyle = color;
+        this.ctx.lineWidth = 3;
+        this.ctx.beginPath();
+        this.ctx.moveTo(startX, startY);
+        this.ctx.lineTo(endX, endY);
+        this.ctx.stroke();
+    }
 }
 
 // UI管理
 class UIManager {
     constructor(gameInstance) {
-        console.log('UIManager constructor called with:', gameInstance);
         this.game = gameInstance;
-        console.log('UIManager this.game set to:', this.game);
-        // イベントリスナーはinit()内で初期化
+        this.selectedSkillIds = []; // 選択されたスキルIDを保持
     }
 
     initEventListeners() {
@@ -807,31 +834,31 @@ class UIManager {
         if (!statusContent) return;
 
         statusContent.innerHTML = `
-            <div class="stat-item">
-                <span class="stat-label">レベル</span>
-                <span class="stat-value">${player.level}</span>
-            </div>
-            <div class="stat-item">
-                <span class="stat-label">HP</span>
-                <span class="stat-value">${player.hp} / ${player.getMaxHp()}</span>
-            </div>
-            <div class="stat-item">
-                <span class="stat-label">MP</span>
-                <span class="stat-value">${player.mp} / ${player.getMaxMp()}</span>
-            </div>
-            <div class="stat-item">
-                <span class="stat-label">攻撃力</span>
-                <span class="stat-value">${player.getAttack()}</span>
-            </div>
-            <div class="stat-item">
-                <span class="stat-label">防御力</span>
-                <span class="stat-value">${player.getDefense()}</span>
-            </div>
-            <div class="stat-item">
-                <span class="stat-label">経験値</span>
-                <span class="stat-value">${player.exp} / ${player.expToNext}</span>
-            </div>
-        `;
+        <div class="stat-item">
+            <span class="stat-label">レベル</span>
+            <span class="stat-value">${player.level}</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">HP</span>
+            <span class="stat-value">${Math.floor(player.hp)} / ${player.getMaxHp()}</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">MP</span>
+            <span class="stat-value">${Math.floor(player.mp)} / ${player.getMaxMp()}</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">攻撃力</span>
+            <span class="stat-value">${player.getAttack()}</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">防御力</span>
+            <span class="stat-value">${player.getDefense()}</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">経験値</span>
+            <span class="stat-value">${player.exp} / ${player.expToNext}</span>
+        </div>
+    `;
     }
 
     updateSkills() {
@@ -911,6 +938,41 @@ class UIManager {
                 }
             });
         });
+    }
+
+    updateSkillDetailList() {
+        const container = document.getElementById('skillDetailContent');
+        const skills = this.game.skillMaster.getAllSkills();
+
+        container.innerHTML = skills.map(skill => {
+            const isSelected = this.selectedSkillIds.includes(skill.id);
+            return `
+                <div class="achievement-item skill-select-item ${isSelected ? 'selected' : ''}" 
+                     onclick="game.uiManager.toggleSkillSelection('${skill.id}')">
+                    <div class="achievement-name">${skill.getDisplayName()}</div>
+                    <div class="achievement-desc">${skill.description}</div>
+                    <div style="font-size: 0.8em; margin-top: 5px; color: #aaa;">
+                        MP: ${skill.getCurrentCost()} | CD: ${Math.round(skill.baseCooldown / 60)}s
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        document.getElementById('selectedSkillCount').innerText = this.selectedSkillIds.length;
+    }
+
+    toggleSkillSelection(skillId) {
+        const index = this.selectedSkillIds.indexOf(skillId);
+        if (index > -1) {
+            this.selectedSkillIds.splice(index, 1);
+        } else if (this.selectedSkillIds.length < 3) {
+            this.selectedSkillIds.push(skillId);
+        }
+
+        // プレイヤーの装備スキルに同期させる
+        this.game.player.equippedSkills = [...this.selectedSkillIds];
+
+        this.updateSkillDetailList();
     }
 }
 
@@ -1279,14 +1341,12 @@ class Game {
         skill.use();
         this.stats.totalSkillUses++;
 
-        // スキル効果発動
         if (skill.element === 'heal') {
             const healAmount = skill.getCurrentDamage();
             this.player.heal(healAmount);
             this.battleLog.addEntry(`${skill.getDisplayName()}！ ${healAmount}回復`, 'heal');
             this.createDamagePopup(this.player.x, this.player.y - 30, `+${healAmount}`, '#51cf66');
         } else {
-            // 攻撃スキル：最も近い敵に攻撃
             if (this.enemies.length > 0) {
                 let nearestEnemy = null;
                 let nearestDistance = Infinity;
@@ -1295,7 +1355,6 @@ class Game {
                     const dx = enemy.x - this.player.x;
                     const dy = enemy.y - this.player.y;
                     const distance = Math.sqrt(dx * dx + dy * dy);
-
                     if (distance < nearestDistance) {
                         nearestDistance = distance;
                         nearestEnemy = enemy;
@@ -1305,6 +1364,19 @@ class Game {
                 if (nearestEnemy) {
                     const damage = skill.getCurrentDamage();
                     const actualDamage = nearestEnemy.takeDamage(damage);
+
+                    // 攻撃の描画：エフェクトをポップアップとして登録（一瞬だけ線を表示するためのフラグ等）
+                    // 簡易的にRendererで直接描画命令を送るか、エフェクトリストに追加する
+                    this.lastAttackEffect = {
+                        startX: this.player.x,
+                        startY: this.player.y,
+                        endX: nearestEnemy.x,
+                        endY: nearestEnemy.y,
+                        color: skill.element === 'fire' ? '#ff4500' :
+                            skill.element === 'ice' ? '#00ffff' : '#ffff00',
+                        life: 10
+                    };
+
                     this.battleLog.addEntry(`${skill.getDisplayName()}！ ${nearestEnemy.name}に${actualDamage}ダメージ`, 'damage');
                     this.createDamagePopup(nearestEnemy.x, nearestEnemy.y - 30, `-${actualDamage}`);
 
@@ -1314,8 +1386,6 @@ class Game {
                 }
             }
         }
-
-        this.checkAchievements();
     }
 
     killEnemy(enemy) {
@@ -1337,29 +1407,15 @@ class Game {
         console.log('completeFloor called, currentFloor:', this.currentFloor, 'maxFloors:', this.currentDungeon.floors);
 
         if (!this.currentDungeon) {
-            console.error('currentDungeon is null!');
             this.battleActive = false;
             this.showBaseMenu();
             return;
         }
 
         if (this.currentFloor < this.currentDungeon.floors) {
-            this.currentFloor++;
-            this.battleLog.addEntry(`階層 ${this.currentFloor} に進みます...`);
-            setTimeout(() => {
-                if (this.battleActive) {
-                    this.generateEnemies();
-                    console.log('New enemies generated for floor:', this.currentFloor, 'count:', this.enemies.length);
-
-                    if (this.enemies.length === 0) {
-                        console.error('No enemies generated on floor change!');
-                        this.battleActive = false;
-                        this.showBaseMenu();
-                    }
-                }
-            }, 2000);
+            this.battleLog.addEntry(`階層 ${this.currentFloor} クリア！ 次の階層へ進む準備をしてください。`);
+            // 自動で進む setTimeout 処理を削除しました
         } else {
-            console.log('Dungeon complete, calling completeDungeon');
             this.completeDungeon();
         }
     }
@@ -1441,46 +1497,50 @@ class Game {
 
         const player = this.player;
         preview.innerHTML = `
-            <div class="stat-item">
-                <span class="stat-label">レベル</span>
-                <span class="stat-value">${player.level}</span>
-            </div>
-            <div class="stat-item">
-                <span class="stat-label">HP</span>
-                <span class="stat-value">${player.hp} / ${player.getMaxHp()}</span>
-            </div>
-            <div class="stat-item">
-                <span class="stat-label">MP</span>
-                <span class="stat-value">${player.mp} / ${player.getMaxMp()}</span>
-            </div>
-        `;
+        <div class="stat-item">
+            <span class="stat-label">レベル</span>
+            <span class="stat-value">${player.level}</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">HP</span>
+            <span class="stat-value">${Math.floor(player.hp)} / ${player.getMaxHp()}</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">MP</span>
+            <span class="stat-value">${Math.floor(player.mp)} / ${player.getMaxMp()}</span>
+        </div>
+    `;
     }
 
     updateSkillDetail() {
         const content = document.getElementById('skillDetailContent');
-        if (!content) {
-            console.error('skillDetailContent element not found!');
-            return;
-        }
-        console.log('updateSkillDetail called, content found:', !!content);
+        if (!content) return;
 
         const skills = this.skillMaster.getAllSkills();
-        console.log('Skills found:', skills.length);
         content.innerHTML = skills.map(skill => {
             const cost = skill.getCurrentCost();
             const damage = skill.getCurrentDamage();
+            const isSelected = this.uiManager.selectedSkillIds.includes(skill.id);
 
             return `
-                <div class="skill-item ${skill.rank > 1 ? 'rank-up' : ''}">
-                    <div class="skill-name">${skill.getDisplayName()}</div>
-                    <div class="skill-rank">ランク ${skill.rank} | 使用回数: ${skill.usageCount}</div>
-                    <div style="margin-top: 5px;">${skill.description}</div>
-                    <div style="margin-top: 5px; color: #aaa;">
-                        消費MP: ${cost} | 威力: ${damage}
-                    </div>
+            <div class="skill-item ${skill.rank > 1 ? 'rank-up' : ''} ${isSelected ? 'selected' : ''}" 
+                 onclick="game.uiManager.toggleSkillSelection('${skill.id}')"
+                 style="cursor: pointer; border: ${isSelected ? '2px solid #ffd700' : '1px solid #444'};">
+                <div class="skill-name">${skill.getDisplayName()} ${isSelected ? ' (装備中)' : ''}</div>
+                <div class="skill-rank">ランク ${skill.rank} | 使用回数: ${skill.usageCount}</div>
+                <div style="margin-top: 5px;">${skill.description}</div>
+                <div style="margin-top: 5px; color: #aaa;">
+                    消費MP: ${cost} | 威力: ${damage}
                 </div>
-            `;
+            </div>
+        `;
         }).join('');
+
+        // スキル選択数の表示更新（HTMLに要素がある場合）
+        const countDisplay = document.getElementById('selectedSkillCount');
+        if (countDisplay) {
+            countDisplay.innerText = this.uiManager.selectedSkillIds.length;
+        }
     }
 
     updateAchievementDetail() {
@@ -1518,57 +1578,51 @@ class Game {
     gameLoop() {
         this.frameCount++;
 
-        // エスケープキーで中断
         if (this.inputHandler.isKeyPressed('escape')) {
             this.battleActive = false;
             this.showBaseMenu();
             return;
         }
 
-        // 戦闘中かつ戦闘画面の時のみ処理
         if (this.battleActive && this.state.currentScreen === 'battleScreen') {
-            // プレイヤー移動
+            // 1. MP自動回復などの更新を呼び出す
+            this.player.update();
+
             this.handlePlayerMovement();
-
-            // スキル発動
             this.handleSkillInput();
-
-            // 敵更新
             this.enemies.forEach(enemy => enemy.update());
-
-            // ダメージポップアップ更新
             this.updateDamagePopups();
-
-            // ゲームオーバーチェック
             this.checkGameOver();
 
-            // 実績チェック
             if (this.frameCount % 60 === 0) {
                 this.checkAchievements();
             }
 
-            // UI更新
             this.uiManager.updateStatus();
             this.uiManager.updateSkills();
             this.uiManager.updateAchievements();
-
-            // 描画
             this.render();
         }
-
         requestAnimationFrame(() => this.gameLoop());
     }
 
     render() {
         this.renderer.clear();
 
-        // プレイヤー描画
-        this.renderer.drawPlayer(this.player.x, this.player.y, this.player.radius);
+        // 攻撃エフェクトの描画
+        if (this.lastAttackEffect && this.lastAttackEffect.life > 0) {
+            this.renderer.drawAttackLine(
+                this.lastAttackEffect.startX,
+                this.lastAttackEffect.startY,
+                this.lastAttackEffect.endX,
+                this.lastAttackEffect.endY,
+                this.lastAttackEffect.color
+            );
+            this.lastAttackEffect.life--;
+        }
 
-        // 敵描画
-        this.enemies.forEach(enemy => {
-            this.renderer.drawEnemy(enemy);
-        });
+        this.renderer.drawPlayer(this.player.x, this.player.y, this.player.radius);
+        this.enemies.forEach(enemy => this.renderer.drawEnemy(enemy));
 
         // ダメージポップアップ描画
         this.damagePopups.forEach(popup => {
