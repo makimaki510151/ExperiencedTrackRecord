@@ -24,13 +24,38 @@ body {
     display: block !important;
 }
 
-/* 拠点メニュー */
+/* styles.css の #baseMenu.screen.active を修正 */
 #baseMenu.screen.active {
-    display: flex !important;
-    flex-direction: column;
+    display: grid !important;
+    grid-template-columns: 1fr 1fr;
+    /* 左右2分割 */
+    grid-template-areas:
+        "title title"
+        "menu status";
     align-items: center;
-    justify-content: center;
-    gap: 30px;
+    justify-items: center;
+    gap: 40px;
+    padding: 40px;
+}
+
+#baseMenu h1 {
+    grid-area: title;
+    margin-bottom: 20px;
+}
+
+.menu-buttons {
+    grid-area: menu;
+    width: 100%;
+    max-width: 300px;
+}
+
+.status-preview {
+    grid-area: status;
+    width: 100%;
+    max-width: 400px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(102, 126, 234, 0.3);
+    backdrop-filter: blur(10px);
 }
 
 /* ダンジョン選択画面 */
@@ -96,20 +121,21 @@ body {
     gap: 15px;
 }
 
-.menu-btn, .back-btn {
-    padding: 15px 30px;
-    font-size: 1.2em;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: transform 0.2s, box-shadow 0.2s;
+.menu-btn,
+.back-btn {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
-.menu-btn:hover, .back-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+.menu-btn:hover {
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
+    filter: brightness(1.2);
+}
+
+.menu-btn:active {
+    transform: translateY(-1px);
 }
 
 .status-preview {
@@ -249,14 +275,18 @@ body {
     overflow-y: auto;
 }
 
-.status-panel, .skill-panel, .achievement-panel {
+.status-panel,
+.skill-panel,
+.achievement-panel {
     background: rgba(0, 0, 0, 0.7);
     border-radius: 10px;
     padding: 15px;
     border: 2px solid #444;
 }
 
-.status-panel h3, .skill-panel h3, .achievement-panel h3 {
+.status-panel h3,
+.skill-panel h3,
+.achievement-panel h3 {
     color: #ffd700;
     margin-bottom: 10px;
     border-bottom: 2px solid #667eea;
@@ -312,26 +342,28 @@ body {
     left: 0;
     width: 100%;
     background: rgba(0, 0, 0, 0.6);
-    height: 0%; /* JSで動的に変更 */
+    height: 0%;
+    /* JSで動的に変更 */
     transition: height 0.1s linear;
     border-radius: 0 0 8px 8px;
 }
 
-/* ステータス表示 */
+/* statusContent 内の HTML 構造を想定 */
 .stat-item {
     display: flex;
     justify-content: space-between;
-    padding: 5px 0;
-    border-bottom: 1px solid #333;
+    margin-bottom: 10px;
+    padding: 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .stat-label {
     color: #aaa;
+    font-weight: bold;
 }
 
 .stat-value {
     color: #ffd700;
-    font-weight: bold;
 }
 
 /* 実績アイテム */
@@ -355,7 +387,8 @@ body {
 }
 
 .achievement-card.unlocked {
-    border-color: #f1c40f; /* 達成済みは金色 */
+    border-color: #f1c40f;
+    /* 達成済みは金色 */
     box-shadow: 0 0 15px rgba(241, 196, 15, 0.3);
 }
 
@@ -420,6 +453,7 @@ body {
         opacity: 1;
         transform: translateY(0) scale(1);
     }
+
     100% {
         opacity: 0;
         transform: translateY(-50px) scale(1.2);
@@ -431,9 +465,19 @@ body {
 }
 
 @keyframes shake {
-    0%, 100% { transform: translateX(0); }
-    25% { transform: translateX(-10px); }
-    75% { transform: translateX(10px); }
+
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+
+    25% {
+        transform: translateX(-10px);
+    }
+
+    75% {
+        transform: translateX(10px);
+    }
 }
 
 /* スクロールバーのスタイル */
@@ -471,13 +515,15 @@ body {
 }
 
 /* スキル・実績詳細画面 */
-#skillScreen, #achievementScreen {
+#skillScreen,
+#achievementScreen {
     max-width: 1200px;
     margin: 0 auto;
     overflow-y: auto;
 }
 
-#skillDetailContent, #achievementDetailContent {
+#skillDetailContent,
+#achievementDetailContent {
     background: rgba(0, 0, 0, 0.7);
     padding: 20px;
     border-radius: 10px;

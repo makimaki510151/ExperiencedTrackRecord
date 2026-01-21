@@ -592,7 +592,14 @@ class Renderer {
     }
 
     resize() {
+        if (!this.canvas) return;
         const container = this.canvas.parentElement;
+        if (!container) {
+            // 親要素がない場合はウィンドウサイズをフォールバックにする
+            this.canvas.width = window.innerWidth;
+            this.canvas.height = window.innerHeight;
+            return;
+        }
         this.canvas.width = container.clientWidth;
         this.canvas.height = container.clientHeight;
     }
@@ -964,14 +971,23 @@ class UIManager {
     toggleSkillSelection(skillId) {
         const index = this.selectedSkillIds.indexOf(skillId);
         if (index > -1) {
+            // 選択解除
             this.selectedSkillIds.splice(index, 1);
-        } else if (this.selectedSkillIds.length < 3) {
-            this.selectedSkillIds.push(skillId);
+        } else {
+            // 3つ未満なら追加可能
+            if (this.selectedSkillIds.length < 3) {
+                this.selectedSkillIds.push(skillId);
+            } else {
+                // すでに3つ選択されている場合は、古いものを1つ消して新しいものを入れる
+                // または、何もしない（今回は後者を採用し、メッセージを表示）
+                console.log('スキルは最大3つまでです');
+                return;
+            }
         }
 
-        // プレイヤーの装備スキルに同期させる
+        // プレイヤーの装備スキルに同期
         this.game.player.equippedSkills = [...this.selectedSkillIds];
-
+        // UIを更新
         this.updateSkillDetailList();
     }
 }
@@ -1574,6 +1590,23 @@ class Game {
         `;
     }
 
+    spawnEnemy() {
+        if (!this.currentDungeon || !this.battleActive) return;
+
+        const dungeonData = this.currentDungeon; // dungeons.jsで定義したデータ
+        const spawnList = dungeonData.spawnList || ['slime'];
+        const randomType = spawnList[Math.floor(Math.random() * spawnList.length)];
+        const enemyData = getEnemyType(randomType);
+
+        // キャンバスの端の方にランダムで出現させる
+        const x = Math.random() > 0.5 ? 0 : this.canvas.width;
+        const y = Math.random() * this.canvas.height;
+
+        const enemy = new Enemy(x, y, enemyData);
+        this.enemies.push(enemy);
+        console.log(`Enemy spawned: ${enemyData.name}`);
+    }
+
     // ゲームループ
     gameLoop() {
         this.frameCount++;
@@ -1598,12 +1631,26 @@ class Game {
                 this.checkAchievements();
             }
 
+            if (this.frameCount % this.currentDungeon.spawnInterval === 0) {
+                this.spawnEnemy();
+            }
+
+            if (this.inputHandler.isKeyPressed('1')) this.useEquippedSkill(0);
+            if (this.inputHandler.isKeyPressed('2')) this.useEquippedSkill(1);
+            if (this.inputHandler.isKeyPressed('3')) this.useEquippedSkill(2);
+
             this.uiManager.updateStatus();
             this.uiManager.updateSkills();
             this.uiManager.updateAchievements();
             this.render();
         }
         requestAnimationFrame(() => this.gameLoop());
+    }
+
+    returnToBase() {
+        this.battleActive = false;
+        this.enemies = [];
+        this.state.showScreen('baseMenu');
     }
 
     render() {

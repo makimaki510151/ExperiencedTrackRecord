@@ -9,7 +9,6 @@
 </head>
 
 <body>
-    <!-- 拠点メニュー画面 -->
     <div id="baseMenu" class="screen active">
         <h1>冒険者の拠点</h1>
         <div class="menu-buttons">
@@ -29,28 +28,30 @@
         </div>
     </div>
 
-    <!-- ダンジョン選択画面 -->
     <div id="dungeonSelect" class="screen">
         <h1>ダンジョン選択</h1>
         <div id="dungeonList" class="dungeon-list"></div>
         <button id="btnBackToBase" class="back-btn">拠点に戻る</button>
     </div>
 
-    <!-- 戦闘画面 -->
     <div id="battleScreen" class="screen">
         <div class="battle-layout">
-            <!-- 左側：戦闘ログ -->
             <div id="battleLog" class="battle-log">
                 <h3>戦闘ログ</h3>
                 <div id="logContent" class="log-content"></div>
+                <button id="btnEscape" class="menu-btn" style="margin-top: 20px; background: #c92a2a;">拠点に帰還する</button>
             </div>
 
-            <!-- 中央：メインゲーム画面 -->
             <div class="game-area">
                 <canvas id="gameCanvas"></canvas>
+                <div id="skillShortcuts" class="skill-shortcuts"
+                    style="display: flex; justify-content: center; gap: 10px; margin-top: 10px;">
+                    <div id="slot0" class="skill-key-slot">Key: 1 [未設定]</div>
+                    <div id="slot1" class="skill-key-slot">Key: 2 [未設定]</div>
+                    <div id="slot2" class="skill-key-slot">Key: 3 [未設定]</div>
+                </div>
             </div>
 
-            <!-- 右側：ステータス・スキル・実績 -->
             <div class="side-panel">
                 <div id="playerStatus" class="status-panel">
                     <h3>ステータス</h3>
@@ -68,19 +69,20 @@
         </div>
     </div>
 
-    <!-- リザルト画面 -->
     <div id="resultScreen" class="screen">
         <h1 id="resultTitle"></h1>
         <div id="resultContent" class="result-content"></div>
         <button id="btnReturnToBase" class="menu-btn">拠点に戻る</button>
     </div>
 
-    <!-- スキル一覧画面 -->
     <div id="skillScreen" class="screen">
-        <h1>スキルセット</h1>
-        <p>使用するスキルを最大3つまで選択してください（現在選択中: <span id="selectedSkillCount">0</span>/3）</p>
-        <div id="skillDetailContent" class="achievement-grid"></div> <button id="btnBackToBase2"
-            class="back-btn">拠点に戻る</button>
+        <div class="screen-container">
+            <h1>スキルセット</h1>
+            <div id="skillDetailContent" class="scrollable-content"></div>
+            <div class="footer-actions">
+                <button id="btnBackToBase2" class="back-btn">拠点に戻る</button>
+            </div>
+        </div>
     </div>
 
     <div id="achievementScreen" class="screen">
@@ -89,11 +91,9 @@
         <button id="btnBackToBase3" class="back-btn">拠点に戻る</button>
     </div>
 
-    <!-- データ定義ファイル（先に読み込む） -->
     <script src="enemies.js"></script>
     <script src="achievements.js"></script>
     <script src="dungeons.js"></script>
-    <!-- メインゲームファイル -->
     <script src="game.js"></script>
 </body>
 

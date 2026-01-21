@@ -5,10 +5,19 @@
 // ダンジョン定義配列（拡張可能）
 function createDungeons() {
     return [
-        new Dungeon('cave_1', '始まりの洞窟', '初心者向けの洞窟', 3),
-        new Dungeon('forest_1', '魔の森', '中級者向けの森', 5),
-        new Dungeon('castle_1', '廃城', '上級者向けの城', 10)
-        // 新しいダンジョンを追加する場合は、ここに定義を追加
-        // new Dungeon('tower_1', '魔法の塔', '最上級者向けの塔', 20)
+        { 
+            id: 'cave_1', 
+            name: '始まりの洞窟', 
+            description: '敵が無限に現れる洞窟', 
+            spawnList: ['slime', 'goblin'], 
+            spawnInterval: 180 // 3秒ごと
+        },
+        { 
+            id: 'forest_1', 
+            name: '魔の森', 
+            description: '中級者向けの森', 
+            spawnList: ['goblin', 'orc', 'skeleton'], 
+            spawnInterval: 120 
+        }
     ];
 }
