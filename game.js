@@ -18,28 +18,28 @@ class GameState {
             // 確実に非表示にする
             screen.style.display = 'none';
         });
-        
+
         // 指定された画面を取得
         const targetScreen = document.getElementById(screenId);
-        
+
         if (!targetScreen) {
             console.error(`画面が見つかりません: ${screenId}`);
             return false;
         }
-        
+
         // 指定された画面にactiveクラスを追加
         targetScreen.classList.add('active');
         this.currentScreen = screenId;
-        
+
         // 強制的に表示（CSSクラスで制御されるが、念のため）
         // CSSの!importantが優先されるので、style属性は削除
         targetScreen.style.display = '';
-        
+
         // デバッグ用ログ
         console.log(`画面を切り替えました: ${screenId}`);
         console.log(`Target screen classes:`, targetScreen.className);
         console.log(`Target screen computed display:`, window.getComputedStyle(targetScreen).display);
-        
+
         return true;
     }
 }
@@ -60,11 +60,11 @@ class Player {
         this.level = 1;
         this.exp = 0;
         this.expToNext = 100;
-        
+
         // プレイヤー画像
         this.image = null;
         this.imageLoaded = false;
-        
+
         // ステータス修正値（称号効果など）
         this.statusModifiers = {
             attack: 0,
@@ -129,15 +129,15 @@ class Player {
         this.level++;
         this.exp -= this.expToNext;
         this.expToNext = Math.floor(this.expToNext * 1.5);
-        
+
         this.maxHp += 10;
         this.maxMp += 5;
         this.attack += 2;
         this.defense += 1;
-        
+
         this.hp = this.getMaxHp();
         this.mp = this.getMaxMp();
-        
+
         game.battleLog.addEntry(`レベルアップ！ Lv.${this.level}`, 'levelup');
     }
 
@@ -186,14 +186,14 @@ class Skill {
         this.baseCost = baseCost;
         this.baseDamage = baseDamage;
         this.element = element;
-        
+
         // 熟練度システム
         this.usageCount = 0;
         this.rank = 1;
-        
+
         // ランクアップ閾値（100回、500回、2000回...）
         this.rankThresholds = [0, 100, 500, 2000, 10000, 50000];
-        
+
         // ランクアップ時の名称変更
         this.rankNames = [
             name, // Rank 1
@@ -234,7 +234,7 @@ class Skill {
                 break;
             }
         }
-        
+
         if (newRank > this.rank) {
             this.rank = newRank;
             game.battleLog.addEntry(`${this.getDisplayName()}のランクが上がった！`, 'levelup');
@@ -290,10 +290,10 @@ class SkillMaster {
 class Enemy {
     constructor(x, y, type = 'goblin') {
         this.type = type;
-        
+
         // 敵タイプ定義は外部ファイル(enemies.js)から取得
         const stats = getEnemyType(type);
-        
+
         this.name = stats.name;
         this.x = x;
         this.y = y;
@@ -304,7 +304,7 @@ class Enemy {
         this.defense = stats.defense;
         this.exp = stats.exp;
         this.color = stats.color;
-        
+
         this.speed = 1.5;
         this.attackCooldown = 0;
         this.attackInterval = 60; // フレーム
@@ -315,12 +315,12 @@ class Enemy {
         const dx = game.player.x - this.x;
         const dy = game.player.y - this.y;
         const distance = Math.sqrt(dx * dx + dy * dy);
-        
+
         if (distance > 0 && distance > this.radius + game.player.radius) {
             this.x += (dx / distance) * this.speed;
             this.y += (dy / distance) * this.speed;
         }
-        
+
         // 攻撃判定
         if (this.attackCooldown > 0) {
             this.attackCooldown--;
@@ -358,7 +358,7 @@ class Achievement {
         this.isHidden = isHidden;
         this.unlocked = false;
         this.unlockedAt = null;
-        
+
         // 称号のパッシブ効果（拡張可能）
         this.passiveEffects = {};
     }
@@ -374,12 +374,12 @@ class Achievement {
         if (!this.unlocked) {
             this.unlocked = true;
             this.unlockedAt = Date.now();
-            
+
             // パッシブ効果を適用
             if (Object.keys(this.passiveEffects).length > 0) {
                 this.applyPassiveEffects();
             }
-            
+
             game.battleLog.addEntry(`実績解除: ${this.name}`, 'levelup');
             game.checkAchievements(); // 他の実績もチェック
         }
@@ -489,11 +489,11 @@ class BattleLog {
     updateUI() {
         const logContent = document.getElementById('logContent');
         if (!logContent) return;
-        
+
         logContent.innerHTML = this.entries.map(entry => {
             return `<div class="log-entry ${entry.type}">${entry.text}</div>`;
         }).join('');
-        
+
         // 自動スクロール
         logContent.scrollTop = logContent.scrollHeight;
     }
@@ -505,22 +505,22 @@ class InputHandler {
         this.keys = {};
         this.gamepad = null;
         this.gamepadIndex = null;
-        
+
         // キーボードイベント
         document.addEventListener('keydown', (e) => {
             this.keys[e.key.toLowerCase()] = true;
         });
-        
+
         document.addEventListener('keyup', (e) => {
             this.keys[e.key.toLowerCase()] = false;
         });
-        
+
         // ゲームパッド接続検出
         window.addEventListener('gamepadconnected', (e) => {
             console.log('ゲームパッド接続:', e.gamepad.id);
             this.gamepadIndex = e.gamepad.index;
         });
-        
+
         window.addEventListener('gamepaddisconnected', (e) => {
             if (e.gamepad.index === this.gamepadIndex) {
                 this.gamepadIndex = null;
@@ -544,11 +544,11 @@ class InputHandler {
     getGamepadDirection() {
         const gamepad = this.getGamepad();
         if (!gamepad) return { x: 0, y: 0 };
-        
+
         const deadzone = 0.2;
         const x = Math.abs(gamepad.axes[0]) > deadzone ? gamepad.axes[0] : 0;
         const y = Math.abs(gamepad.axes[1]) > deadzone ? gamepad.axes[1] : 0;
-        
+
         return { x, y };
     }
 
@@ -565,7 +565,7 @@ class Renderer {
     constructor(canvasId) {
         this.canvas = document.getElementById(canvasId);
         this.ctx = this.canvas.getContext('2d');
-        
+
         // キャンバスサイズ設定
         this.resize();
         window.addEventListener('resize', () => this.resize());
@@ -585,7 +585,7 @@ class Renderer {
     // プレイヤー描画
     drawPlayer(x, y, radius) {
         const player = game.player;
-        
+
         if (player.imageLoaded && player.image) {
             // 画像を描画
             this.ctx.save();
@@ -606,7 +606,7 @@ class Renderer {
             this.ctx.beginPath();
             this.ctx.arc(x, y, radius, 0, Math.PI * 2);
             this.ctx.fill();
-            
+
             // 目を描画
             this.ctx.fillStyle = '#000';
             this.ctx.beginPath();
@@ -614,16 +614,16 @@ class Renderer {
             this.ctx.arc(x + 5, y - 3, 3, 0, Math.PI * 2);
             this.ctx.fill();
         }
-        
+
         // HPバー
         const barWidth = radius * 2;
         const barHeight = 4;
         const barX = x - radius;
         const barY = y - radius - 10;
-        
+
         this.ctx.fillStyle = '#333';
         this.ctx.fillRect(barX, barY, barWidth, barHeight);
-        
+
         const hpRatio = player.hp / player.getMaxHp();
         this.ctx.fillStyle = hpRatio > 0.5 ? '#51cf66' : hpRatio > 0.25 ? '#ffd43b' : '#ff6b6b';
         this.ctx.fillRect(barX, barY, barWidth * hpRatio, barHeight);
@@ -636,20 +636,20 @@ class Renderer {
         this.ctx.beginPath();
         this.ctx.arc(enemy.x, enemy.y, enemy.radius, 0, Math.PI * 2);
         this.ctx.fill();
-        
+
         // HPバー
         const barWidth = enemy.radius * 2;
         const barHeight = 3;
         const barX = enemy.x - enemy.radius;
         const barY = enemy.y - enemy.radius - 8;
-        
+
         this.ctx.fillStyle = '#333';
         this.ctx.fillRect(barX, barY, barWidth, barHeight);
-        
+
         const hpRatio = enemy.hp / enemy.maxHp;
         this.ctx.fillStyle = '#ff6b6b';
         this.ctx.fillRect(barX, barY, barWidth * hpRatio, barHeight);
-        
+
         // 名前
         this.ctx.fillStyle = '#fff';
         this.ctx.font = '10px sans-serif';
@@ -678,14 +678,14 @@ class UIManager {
     initEventListeners() {
         // this.gameをローカル変数に保存して、thisのコンテキスト問題を回避
         const gameInstance = this.game;
-        
+
         if (!gameInstance) {
             console.error('UIManager: gameInstance is undefined! Cannot initialize event listeners.');
             return;
         }
-        
+
         console.log('initEventListeners called, gameInstance:', gameInstance);
-        
+
         // 拠点メニュー
         const btnDungeon = document.getElementById('btnDungeon');
         if (btnDungeon) {
@@ -700,7 +700,7 @@ class UIManager {
         } else {
             console.error('btnDungeon element not found!');
         }
-        
+
         const btnSkills = document.getElementById('btnSkills');
         if (btnSkills) {
             btnSkills.addEventListener('click', () => {
@@ -714,7 +714,7 @@ class UIManager {
         } else {
             console.error('btnSkills element not found!');
         }
-        
+
         const btnAchievements = document.getElementById('btnAchievements');
         if (btnAchievements) {
             btnAchievements.addEventListener('click', () => {
@@ -728,7 +728,7 @@ class UIManager {
         } else {
             console.error('btnAchievements element not found!');
         }
-        
+
         const btnSettings = document.getElementById('btnSettings');
         if (btnSettings) {
             btnSettings.addEventListener('click', () => {
@@ -736,7 +736,7 @@ class UIManager {
                 console.log('設定画面は未実装です');
             });
         }
-        
+
         // ダンジョン選択
         const btnBackToBase = document.getElementById('btnBackToBase');
         if (btnBackToBase) {
@@ -747,7 +747,7 @@ class UIManager {
         } else {
             console.error('btnBackToBase element not found!');
         }
-        
+
         // リザルト画面
         const btnReturnToBase = document.getElementById('btnReturnToBase');
         if (btnReturnToBase) {
@@ -758,7 +758,7 @@ class UIManager {
         } else {
             console.error('btnReturnToBase element not found!');
         }
-        
+
         // スキル・実績画面
         const btnBackToBase2 = document.getElementById('btnBackToBase2');
         if (btnBackToBase2) {
@@ -769,7 +769,7 @@ class UIManager {
         } else {
             console.error('btnBackToBase2 element not found!');
         }
-        
+
         const btnBackToBase3 = document.getElementById('btnBackToBase3');
         if (btnBackToBase3) {
             btnBackToBase3.addEventListener('click', () => {
@@ -779,7 +779,7 @@ class UIManager {
         } else {
             console.error('btnBackToBase3 element not found!');
         }
-        
+
         // プレイヤー画像アップロード
         const imageInput = document.getElementById('playerImageInput');
         if (imageInput) {
@@ -790,7 +790,7 @@ class UIManager {
                 }
             });
         }
-        
+
         const btnResetPlayerImage = document.getElementById('btnResetPlayerImage');
         if (btnResetPlayerImage) {
             btnResetPlayerImage.addEventListener('click', () => {
@@ -805,7 +805,7 @@ class UIManager {
         const player = this.game.player;
         const statusContent = document.getElementById('statusContent');
         if (!statusContent) return;
-        
+
         statusContent.innerHTML = `
             <div class="stat-item">
                 <span class="stat-label">レベル</span>
@@ -837,13 +837,13 @@ class UIManager {
     updateSkills() {
         const skillContent = document.getElementById('skillContent');
         if (!skillContent) return;
-        
+
         const skills = this.game.skillMaster.getAllSkills();
         skillContent.innerHTML = skills.map(skill => {
             const cost = skill.getCurrentCost();
             const damage = skill.getCurrentDamage();
             const rankClass = skill.rank > 1 ? 'rank-up' : '';
-            
+
             return `
                 <div class="skill-item ${rankClass}">
                     <div class="skill-name">${skill.getDisplayName()}</div>
@@ -860,7 +860,7 @@ class UIManager {
     updateAchievements() {
         const achievementContent = document.getElementById('achievementContent');
         if (!achievementContent) return;
-        
+
         const achievements = this.game.achievementMaster.getAllAchievements();
         achievementContent.innerHTML = achievements.slice(0, 5).map(achievement => {
             const unlockedClass = achievement.unlocked ? 'unlocked' : 'locked';
@@ -881,7 +881,7 @@ class UIManager {
             console.error('dungeonList element not found!');
             return;
         }
-        
+
         const gameInstance = this.game;
         const dungeons = gameInstance.dungeonMaster.getAllDungeons();
         dungeonList.innerHTML = dungeons.map(dungeon => {
@@ -893,13 +893,13 @@ class UIManager {
                 </div>
             `;
         }).join('');
-        
+
         // ダンジョン選択イベント（既存のイベントリスナーを削除してから追加）
         dungeonList.querySelectorAll('.dungeon-item').forEach(item => {
             // 既存のイベントリスナーを削除（クローンで回避）
             const newItem = item.cloneNode(true);
             item.parentNode.replaceChild(newItem, item);
-            
+
             newItem.addEventListener('click', (e) => {
                 e.stopPropagation(); // イベントの伝播を停止
                 const dungeonId = newItem.dataset.dungeonId;
@@ -921,7 +921,7 @@ class SaveSystem {
             console.warn('achievementMasterが初期化されていません。セーブをスキップします。');
             return;
         }
-        
+
         const saveData = {
             player: game.player.toSaveData(),
             skills: game.skillMaster.getAllSkills().map(s => s.toSaveData()),
@@ -933,7 +933,7 @@ class SaveSystem {
             stats: game.stats,
             version: '1.0'
         };
-        
+
         localStorage.setItem('webrpg_save', JSON.stringify(saveData));
         console.log('ゲームをセーブしました');
     }
@@ -944,13 +944,13 @@ class SaveSystem {
             console.log('セーブデータが見つかりません');
             return false;
         }
-        
+
         try {
             const saveData = JSON.parse(saveDataStr);
-            
+
             // プレイヤーデータ復元
             game.player.fromSaveData(saveData.player);
-            
+
             // スキルデータ復元
             saveData.skills.forEach(skillData => {
                 const skill = game.skillMaster.getSkill(skillData.id);
@@ -958,7 +958,7 @@ class SaveSystem {
                     skill.fromSaveData(skillData);
                 }
             });
-            
+
             // 実績データ復元
             if (game.achievementMaster) {
                 saveData.achievements.forEach(achievementData => {
@@ -972,12 +972,12 @@ class SaveSystem {
                     }
                 });
             }
-            
+
             // 統計データ復元
             if (saveData.stats) {
                 game.stats = { ...game.stats, ...saveData.stats };
             }
-            
+
             console.log('ゲームをロードしました');
             return true;
         } catch (e) {
@@ -992,7 +992,7 @@ class Game {
     constructor() {
         this.canvas = null;
         this.ctx = null;
-        
+
         // ゲーム状態
         this.state = new GameState();
         this.player = new Player();
@@ -1004,23 +1004,23 @@ class Game {
         this.battleLog = new BattleLog();
         this.uiManager = new UIManager(this);
         this.renderer = null;
-        
+
         // 戦闘関連
         this.enemies = [];
         this.currentDungeon = null;
         this.currentFloor = 1;
         this.battleActive = false;
-        
+
         // 統計
         this.stats = {
             enemiesKilled: 0,
             totalDamageTaken: 0,
             totalSkillUses: 0
         };
-        
+
         // ダメージポップアップ
         this.damagePopups = [];
-        
+
         // フレームカウンター
         this.frameCount = 0;
     }
@@ -1032,19 +1032,19 @@ class Game {
             console.error('baseMenu要素が見つかりません。DOMの読み込みを確認してください。');
             return;
         }
-        
+
         // キャンバス初期化
         this.renderer = new Renderer('gameCanvas');
-        
+
         // AchievementMasterを初期化（gameインスタンスが必要）
         this.achievementMaster = new AchievementMaster(this);
-        
+
         // UIイベントリスナー初期化（DOM要素が読み込まれた後）
         this.uiManager.initEventListeners();
-        
+
         // セーブデータ読み込み
         SaveSystem.load();
-        
+
         // 初期画面の確認と設定
         // HTMLで既にactiveクラスが設定されているが、念のため確認
         const currentActiveScreen = document.querySelector('.screen.active');
@@ -1055,15 +1055,15 @@ class Game {
             // ステータスプレビュー更新のみ実行
             this.updateStatusPreview();
         }
-        
+
         // ゲームループ開始
         this.gameLoop();
-        
+
         // 定期的にセーブ（30秒ごと）
         setInterval(() => {
             SaveSystem.save();
         }, 30000);
-        
+
         // ページ離脱時にセーブ
         window.addEventListener('beforeunload', () => {
             SaveSystem.save();
@@ -1114,61 +1114,67 @@ class Game {
         this.updateAchievementDetail();
     }
 
+    // ダンジョン開始処理
     startDungeon(dungeonId) {
-        console.log('startDungeon called with:', dungeonId);
-        
-        // 既に戦闘中の場合は何もしない
-        if (this.battleActive) {
-            console.log('Battle already active, ignoring startDungeon');
-            return;
-        }
-        
-        const dungeon = this.dungeonMaster.getDungeon(dungeonId);
-        if (!dungeon) {
-            console.error('Dungeon not found:', dungeonId);
-            return;
-        }
-        
-        this.currentDungeon = dungeon;
+        this.currentDungeon = this.dungeonMaster.getDungeon(dungeonId);
         this.currentFloor = 1;
-        this.enemies = [];
-        
-        // 少し遅延してから戦闘開始（画面遷移を確実にするため）
-        setTimeout(() => {
-            this.startBattle();
-        }, 100);
+        this.player.hp = this.player.getMaxHp();
+        this.player.mp = this.player.getMaxMp();
+
+        // 修正: startBattleを呼んで敵生成と画面切り替えを行う
+        this.startBattle();
+    }
+
+    // スキル装備ロジックの追加
+    toggleSkillEquip(skillId) {
+        if (!this.player.equippedSkills) this.player.equippedSkills = [];
+
+        const index = this.player.equippedSkills.indexOf(skillId);
+        if (index > -1) {
+            // すでに装備済みなら外す
+            this.player.equippedSkills.splice(index, 1);
+        } else {
+            // 3つまでしか装備できない制限
+            if (this.player.equippedSkills.length < 3) {
+                this.player.equippedSkills.push(skillId);
+            } else {
+                alert("セットできるスキルは3つまでです。");
+                return;
+            }
+        }
+        this.uiManager.updateSkillScreen();
     }
 
     startBattle() {
         console.log('startBattle called');
-        
+
         // 戦闘中の場合は何もしない
         if (this.battleActive) {
             console.log('Battle already active, ignoring startBattle');
             return;
         }
-        
+
         // 画面切り替え
         this.state.showScreen('battleScreen');
-        
+
         // キャンバスサイズを確実に取得
         this.renderer.resize();
         const canvasWidth = this.renderer.canvas.width || 800;
         const canvasHeight = this.renderer.canvas.height || 600;
         console.log('canvas size:', canvasWidth, canvasHeight);
-        
+
         // プレイヤー位置リセット
         this.player.x = canvasWidth / 2;
         this.player.y = canvasHeight / 2;
-        
+
         // 戦闘状態を設定
         this.battleActive = true;
         this.enemies = [];
-        
+
         // 敵生成
         this.generateEnemies();
         console.log('Enemies generated:', this.enemies.length);
-        
+
         // 敵が生成されていない場合はエラー
         if (this.enemies.length === 0) {
             console.error('No enemies generated!');
@@ -1176,7 +1182,7 @@ class Game {
             this.showBaseMenu();
             return;
         }
-        
+
         this.battleLog.addEntry(`階層 ${this.currentFloor} に突入！`);
     }
 
@@ -1184,18 +1190,18 @@ class Game {
         this.enemies = [];
         const enemyCount = 3 + this.currentFloor;
         console.log('generateEnemies called, enemyCount:', enemyCount, 'floor:', this.currentFloor);
-        
+
         for (let i = 0; i < enemyCount; i++) {
             const angle = (Math.PI * 2 / enemyCount) * i;
             const distance = 200;
             const x = this.player.x + Math.cos(angle) * distance;
             const y = this.player.y + Math.sin(angle) * distance;
-            
+
             // 階層に応じて敵タイプを決定
             let enemyType = 'goblin';
             if (this.currentFloor >= 3) enemyType = 'orc';
             if (this.currentFloor >= 5) enemyType = 'skeleton';
-            
+
             const enemy = new Enemy(x, y, enemyType);
             this.enemies.push(enemy);
             console.log(`Enemy ${i + 1} created: ${enemy.name} at (${x.toFixed(1)}, ${y.toFixed(1)})`);
@@ -1207,7 +1213,7 @@ class Game {
     handlePlayerMovement() {
         let dx = 0;
         let dy = 0;
-        
+
         // キーボード入力
         if (this.inputHandler.isKeyPressed('w') || this.inputHandler.isKeyPressed('arrowup')) {
             dy -= 1;
@@ -1221,22 +1227,22 @@ class Game {
         if (this.inputHandler.isKeyPressed('d') || this.inputHandler.isKeyPressed('arrowright')) {
             dx += 1;
         }
-        
+
         // ゲームパッド入力
         const gamepadDir = this.inputHandler.getGamepadDirection();
         dx += gamepadDir.x;
         dy += gamepadDir.y;
-        
+
         // 正規化
         if (dx !== 0 || dy !== 0) {
             const length = Math.sqrt(dx * dx + dy * dy);
             dx /= length;
             dy /= length;
-            
+
             const speed = this.player.getSpeed();
             const newX = this.player.x + dx * speed;
             const newY = this.player.y + dy * speed;
-            
+
             // 画面内に制限
             const margin = this.player.radius;
             this.player.x = Math.max(margin, Math.min(this.renderer.canvas.width - margin, newX));
@@ -1248,11 +1254,11 @@ class Game {
     handleSkillInput() {
         const skills = this.skillMaster.getAllSkills();
         const skillKeys = ['z', 'x', 'c', 'v', 'b'];
-        
+
         for (let i = 0; i < Math.min(skills.length, skillKeys.length); i++) {
-            if (this.inputHandler.isKeyPressed(skillKeys[i]) || 
+            if (this.inputHandler.isKeyPressed(skillKeys[i]) ||
                 this.inputHandler.isGamepadButtonPressed(i)) {
-                
+
                 // 連続入力防止（キーボード用）
                 const key = `skill_${i}`;
                 if (!this.lastSkillFrame || this.frameCount - this.lastSkillFrame > 10) {
@@ -1269,10 +1275,10 @@ class Game {
             this.battleLog.addEntry('MPが足りません！');
             return;
         }
-        
+
         skill.use();
         this.stats.totalSkillUses++;
-        
+
         // スキル効果発動
         if (skill.element === 'heal') {
             const healAmount = skill.getCurrentDamage();
@@ -1284,31 +1290,31 @@ class Game {
             if (this.enemies.length > 0) {
                 let nearestEnemy = null;
                 let nearestDistance = Infinity;
-                
+
                 this.enemies.forEach(enemy => {
                     const dx = enemy.x - this.player.x;
                     const dy = enemy.y - this.player.y;
                     const distance = Math.sqrt(dx * dx + dy * dy);
-                    
+
                     if (distance < nearestDistance) {
                         nearestDistance = distance;
                         nearestEnemy = enemy;
                     }
                 });
-                
+
                 if (nearestEnemy) {
                     const damage = skill.getCurrentDamage();
                     const actualDamage = nearestEnemy.takeDamage(damage);
                     this.battleLog.addEntry(`${skill.getDisplayName()}！ ${nearestEnemy.name}に${actualDamage}ダメージ`, 'damage');
                     this.createDamagePopup(nearestEnemy.x, nearestEnemy.y - 30, `-${actualDamage}`);
-                    
+
                     if (nearestEnemy.isDead()) {
                         this.killEnemy(nearestEnemy);
                     }
                 }
             }
         }
-        
+
         this.checkAchievements();
     }
 
@@ -1318,7 +1324,7 @@ class Game {
         this.player.gainExp(enemy.exp);
         this.stats.enemiesKilled++;
         this.battleLog.addEntry(`${enemy.name}を倒した！ +${enemy.exp}EXP`);
-        
+
         // 全敵撃破時
         console.log('Remaining enemies:', this.enemies.length);
         if (this.enemies.length === 0) {
@@ -1329,14 +1335,14 @@ class Game {
 
     completeFloor() {
         console.log('completeFloor called, currentFloor:', this.currentFloor, 'maxFloors:', this.currentDungeon.floors);
-        
+
         if (!this.currentDungeon) {
             console.error('currentDungeon is null!');
             this.battleActive = false;
             this.showBaseMenu();
             return;
         }
-        
+
         if (this.currentFloor < this.currentDungeon.floors) {
             this.currentFloor++;
             this.battleLog.addEntry(`階層 ${this.currentFloor} に進みます...`);
@@ -1344,7 +1350,7 @@ class Game {
                 if (this.battleActive) {
                     this.generateEnemies();
                     console.log('New enemies generated for floor:', this.currentFloor, 'count:', this.enemies.length);
-                    
+
                     if (this.enemies.length === 0) {
                         console.error('No enemies generated on floor change!');
                         this.battleActive = false;
@@ -1381,13 +1387,13 @@ class Game {
         this.state.showScreen('resultScreen');
         const resultTitle = document.getElementById('resultTitle');
         const resultContent = document.getElementById('resultContent');
-        
+
         if (!resultTitle || !resultContent) {
             console.error('Result screen elements not found!');
             this.showBaseMenu();
             return;
         }
-        
+
         if (victory && this.currentDungeon) {
             resultTitle.textContent = 'ダンジョンクリア！';
             resultContent.innerHTML = `
@@ -1401,7 +1407,7 @@ class Game {
                 <p>経験値は保持されています。</p>
             `;
         }
-        
+
         SaveSystem.save();
     }
 
@@ -1432,7 +1438,7 @@ class Game {
     updateStatusPreview() {
         const preview = document.getElementById('statusPreviewContent');
         if (!preview) return;
-        
+
         const player = this.player;
         preview.innerHTML = `
             <div class="stat-item">
@@ -1457,13 +1463,13 @@ class Game {
             return;
         }
         console.log('updateSkillDetail called, content found:', !!content);
-        
+
         const skills = this.skillMaster.getAllSkills();
         console.log('Skills found:', skills.length);
         content.innerHTML = skills.map(skill => {
             const cost = skill.getCurrentCost();
             const damage = skill.getCurrentDamage();
-            
+
             return `
                 <div class="skill-item ${skill.rank > 1 ? 'rank-up' : ''}">
                     <div class="skill-name">${skill.getDisplayName()}</div>
@@ -1484,18 +1490,18 @@ class Game {
             return;
         }
         console.log('updateAchievementDetail called, content found:', !!content);
-        
+
         const achievements = this.achievementMaster.getAllAchievements();
         console.log('Achievements found:', achievements.length);
         const unlockedCount = achievements.filter(a => a.unlocked).length;
-        
+
         content.innerHTML = `
             <div style="margin-bottom: 20px; padding: 10px; background: rgba(102, 126, 234, 0.2); border-radius: 5px;">
                 解除済み: ${unlockedCount} / ${achievements.length}
             </div>
             ${achievements.map(achievement => {
-                const unlockedClass = achievement.unlocked ? 'unlocked' : 'locked';
-                return `
+            const unlockedClass = achievement.unlocked ? 'unlocked' : 'locked';
+            return `
                     <div class="achievement-item ${unlockedClass}">
                         <div class="achievement-name">${achievement.getDisplayName()}</div>
                         <div class="achievement-desc ${achievement.isHidden && !achievement.unlocked ? 'achievement-hidden' : ''}">
@@ -1504,59 +1510,66 @@ class Game {
                         ${achievement.unlocked ? `<div style="color: #51cf66; font-size: 0.9em; margin-top: 5px;">解除済み</div>` : ''}
                     </div>
                 `;
-            }).join('')}
+        }).join('')}
         `;
     }
 
     // ゲームループ
     gameLoop() {
         this.frameCount++;
-        
+
+        // エスケープキーで中断
+        if (this.inputHandler.isKeyPressed('escape')) {
+            this.battleActive = false;
+            this.showBaseMenu();
+            return;
+        }
+
         // 戦闘中かつ戦闘画面の時のみ処理
         if (this.battleActive && this.state.currentScreen === 'battleScreen') {
             // プレイヤー移動
             this.handlePlayerMovement();
-            
+
             // スキル発動
             this.handleSkillInput();
-            
+
             // 敵更新
             this.enemies.forEach(enemy => enemy.update());
-            
+
             // ダメージポップアップ更新
             this.updateDamagePopups();
-            
+
             // ゲームオーバーチェック
             this.checkGameOver();
-            
+
             // 実績チェック
             if (this.frameCount % 60 === 0) {
                 this.checkAchievements();
             }
-            
+
             // UI更新
             this.uiManager.updateStatus();
             this.uiManager.updateSkills();
             this.uiManager.updateAchievements();
-            
+
             // 描画
             this.render();
         }
-        
+
         requestAnimationFrame(() => this.gameLoop());
     }
 
     render() {
         this.renderer.clear();
-        
+
         // プレイヤー描画
         this.renderer.drawPlayer(this.player.x, this.player.y, this.player.radius);
-        
+
         // 敵描画
         this.enemies.forEach(enemy => {
             this.renderer.drawEnemy(enemy);
         });
-        
+
         // ダメージポップアップ描画
         this.damagePopups.forEach(popup => {
             const alpha = popup.life / 60;

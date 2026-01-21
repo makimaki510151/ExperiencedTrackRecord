@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>テキストベースファンタジーRPG</title>
     <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
     <!-- 拠点メニュー画面 -->
     <div id="baseMenu" class="screen active">
@@ -19,6 +21,11 @@
         <div id="playerStatusPreview" class="status-preview">
             <h3>ステータス</h3>
             <div id="statusPreviewContent"></div>
+            <div id="playerImageUpload" class="image-upload-panel">
+                <h4>プレイヤー画像設定</h4>
+                <input type="file" id="playerImageInput" accept="image/*">
+                <button id="btnResetPlayerImage">リセット</button>
+            </div>
         </div>
     </div>
 
@@ -41,11 +48,6 @@
             <!-- 中央：メインゲーム画面 -->
             <div class="game-area">
                 <canvas id="gameCanvas"></canvas>
-                <div id="playerImageUpload" class="image-upload-panel">
-                    <h4>プレイヤー画像設定</h4>
-                    <input type="file" id="playerImageInput" accept="image/*">
-                    <button id="btnResetPlayerImage">デフォルトに戻す</button>
-                </div>
             </div>
 
             <!-- 右側：ステータス・スキル・実績 -->
@@ -75,15 +77,15 @@
 
     <!-- スキル一覧画面 -->
     <div id="skillScreen" class="screen">
-        <h1>スキル一覧</h1>
-        <div id="skillDetailContent"></div>
+        <h1>スキルセット</h1>
+        <p>使用するスキルを最大3つまで選択してください。</p>
+        <div id="skillDetailContent" class="skill-grid"></div>
         <button id="btnBackToBase2" class="back-btn">拠点に戻る</button>
     </div>
 
-    <!-- 実績一覧画面 -->
     <div id="achievementScreen" class="screen">
-        <h1>実績・称号一覧</h1>
-        <div id="achievementDetailContent"></div>
+        <h1>実績・称号</h1>
+        <div id="achievementDetailContent" class="achievement-grid"></div>
         <button id="btnBackToBase3" class="back-btn">拠点に戻る</button>
     </div>
 
@@ -94,4 +96,5 @@
     <!-- メインゲームファイル -->
     <script src="game.js"></script>
 </body>
+
 </html>
